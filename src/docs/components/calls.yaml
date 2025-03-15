@@ -1,0 +1,916 @@
+/**
+ * @swagger
+ * tags:
+ *   name: Calls
+ *   description: Call Manager API
+ * 
+ * components:
+ *   schemas:
+ *     Call:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *           format: uuid
+ *           description: Call unique identifier
+ *           example: 550e8400-e29b-41d4-a716-446655440000
+ *         userId:
+ *           type: string
+ *           format: uuid
+ *           description: ID of the user who made the call
+ *           example: 550e8400-e29b-41d4-a716-446655440000
+ *         contactId:
+ *           type: string
+ *           format: uuid
+ *           description: ID of the contact called (if applicable)
+ *           example: 550e8400-e29b-41d4-a716-446655440000
+ *         companyId:
+ *           type: string
+ *           format: uuid
+ *           description: ID of the company called (if applicable)
+ *           example: 550e8400-e29b-41d4-a716-446655440000
+ *         scheduledTime:
+ *           type: string
+ *           format: date-time
+ *           description: When the call is scheduled
+ *           example: '2023-01-01T09:00:00Z'
+ *         actualStartTime:
+ *           type: string
+ *           format: date-time
+ *           description: When the call actually started
+ *           example: '2023-01-01T09:02:00Z'
+ *         actualEndTime:
+ *           type: string
+ *           format: date-time
+ *           description: When the call actually ended
+ *           example: '2023-01-01T09:15:00Z'
+ *         duration:
+ *           type: integer
+ *           description: Call duration in seconds
+ *           example: 780
+ *         status:
+ *           type: string
+ *           enum: [SCHEDULED, IN_PROGRESS, COMPLETED, MISSED, CANCELLED]
+ *           description: Call status
+ *           example: COMPLETED
+ *         purpose:
+ *           type: string
+ *           description: Purpose of the call
+ *           example: Follow-up on proposal
+ *         notes:
+ *           type: string
+ *           description: Notes about the call
+ *           example: The client requested additional information about pricing.
+ *         outcome:
+ *           type: string
+ *           description: Outcome of the call
+ *           example: Client agreed to review the updated proposal
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *           description: When the call was created
+ *           example: '2023-01-01T00:00:00Z'
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *           description: When the call was last updated
+ *           example: '2023-01-01T00:00:00Z'
+ *         company:
+ *           $ref: '#/components/schemas/Company'
+ *         contact:
+ *           $ref: '#/components/schemas/Contact'
+ *         user:
+ *           $ref: '#/components/schemas/User'
+ * 
+ * paths:
+ *   /calls:
+ *     get:
+ *       summary: Get all calls
+ *       description: Retrieve a list of calls with filtering, pagination, and sorting options
+ *       tags: [Calls]
+ *       security:
+ *         - bearerAuth: []
+ *       parameters:
+ *         - in: query
+ *           name: page
+ *           schema:
+ *             type: integer
+ *             minimum: 1
+ *             default: 1
+ *           description: Page number
+ *         - in: query
+ *           name: limit
+ *           schema:
+ *             type: integer
+ *             minimum: 1
+ *             maximum: 100
+ *             default: 10
+ *           description: Number of items per page
+ *         - in: query
+ *           name: startDate
+ *           schema:
+ *             type: string
+ *             format: date
+ *           description: Filter calls by start date (inclusive)
+ *         - in: query
+ *           name: endDate
+ *           schema:
+ *             type: string
+ *             format: date
+ *           description: Filter calls by end date (inclusive)
+ *         - in: query
+ *           name: status
+ *           schema:
+ *             type: string
+ *             enum: [SCHEDULED, IN_PROGRESS, COMPLETED, MISSED, CANCELLED]
+ *           description: Filter calls by status
+ *         - in: query
+ *           name: contactId
+ *           schema:
+ *             type: string
+ *             format: uuid
+ *           description: Filter calls by contact ID
+ *         - in: query
+ *           name: companyId
+ *           schema:
+ *             type: string
+ *             format: uuid
+ *           description: Filter calls by company ID
+ *         - in: query
+ *           name: search
+ *           schema:
+ *             type: string
+ *           description: Search term for company or contact name, purpose, or notes
+ *         - in: query
+ *           name: sortBy
+ *           schema:
+ *             type: string
+ *             enum: [scheduledTime, actualStartTime, duration, status, createdAt]
+ *             default: scheduledTime
+ *           description: Field to sort by
+ *         - in: query
+ *           name: order
+ *           schema:
+ *             type: string
+ *             enum: [asc, desc]
+ *             default: desc
+ *           description: Sort order
+ *       responses:
+ *         200:
+ *           description: A list of calls
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 properties:
+ *                   status:
+ *                     type: string
+ *                     example: success
+ *                   data:
+ *                     type: object
+ *                     properties:
+ *                       calls:
+ *                         type: array
+ *                         items:
+ *                           $ref: '#/components/schemas/Call'
+ *                       pagination:
+ *                         $ref: '#/components/schemas/Pagination'
+ *         401:
+ *           $ref: '#/components/responses/UnauthorizedError'
+ *         403:
+ *           description: Forbidden - insufficient permissions
+ *         500:
+ *           $ref: '#/components/responses/ServerError'
+ * 
+ *     post:
+ *       summary: Schedule a new call
+ *       description: Schedule a new call with a contact or company
+ *       tags: [Calls]
+ *       security:
+ *         - bearerAuth: []
+ *       requestBody:
+ *         required: true
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               required:
+ *                 - scheduledTime
+ *                 - purpose
+ *               properties:
+ *                 contactId:
+ *                   type: string
+ *                   format: uuid
+ *                   description: ID of the contact to call (either contactId or companyId must be provided)
+ *                 companyId:
+ *                   type: string
+ *                   format: uuid
+ *                   description: ID of the company to call (either contactId or companyId must be provided)
+ *                 scheduledTime:
+ *                   type: string
+ *                   format: date-time
+ *                   description: Scheduled time for the call
+ *                 purpose:
+ *                   type: string
+ *                   description: Purpose of the call
+ *                 notes:
+ *                   type: string
+ *                   description: Additional notes about the call
+ *       responses:
+ *         201:
+ *           description: Call scheduled successfully
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 properties:
+ *                   status:
+ *                     type: string
+ *                     example: success
+ *                   message:
+ *                     type: string
+ *                     example: Call scheduled successfully
+ *                   data:
+ *                     $ref: '#/components/schemas/Call'
+ *         400:
+ *           $ref: '#/components/responses/BadRequestError'
+ *         401:
+ *           $ref: '#/components/responses/UnauthorizedError'
+ *         403:
+ *           description: Forbidden - insufficient permissions
+ *         404:
+ *           description: Contact or company not found
+ *         500:
+ *           $ref: '#/components/responses/ServerError'
+ * 
+ *   /calls/{id}:
+ *     get:
+ *       summary: Get a specific call
+ *       description: Retrieve detailed information about a specific call by ID
+ *       tags: [Calls]
+ *       security:
+ *         - bearerAuth: []
+ *       parameters:
+ *         - in: path
+ *           name: id
+ *           required: true
+ *           schema:
+ *             type: string
+ *             format: uuid
+ *           description: Call ID
+ *       responses:
+ *         200:
+ *           description: Call details
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 properties:
+ *                   status:
+ *                     type: string
+ *                     example: success
+ *                   data:
+ *                     $ref: '#/components/schemas/Call'
+ *         401:
+ *           $ref: '#/components/responses/UnauthorizedError'
+ *         403:
+ *           description: Forbidden - insufficient permissions
+ *         404:
+ *           description: Call not found
+ *         500:
+ *           $ref: '#/components/responses/ServerError'
+ * 
+ *     patch:
+ *       summary: Update a call
+ *       description: Update an existing call's details
+ *       tags: [Calls]
+ *       security:
+ *         - bearerAuth: []
+ *       parameters:
+ *         - in: path
+ *           name: id
+ *           required: true
+ *           schema:
+ *             type: string
+ *             format: uuid
+ *           description: Call ID
+ *       requestBody:
+ *         required: true
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 scheduledTime:
+ *                   type: string
+ *                   format: date-time
+ *                   description: Scheduled time for the call
+ *                 purpose:
+ *                   type: string
+ *                   description: Purpose of the call
+ *                 notes:
+ *                   type: string
+ *                   description: Additional notes about the call
+ *                 outcome:
+ *                   type: string
+ *                   description: Outcome of the call
+ *       responses:
+ *         200:
+ *           description: Call updated successfully
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 properties:
+ *                   status:
+ *                     type: string
+ *                     example: success
+ *                   message:
+ *                     type: string
+ *                     example: Call updated successfully
+ *                   data:
+ *                     $ref: '#/components/schemas/Call'
+ *         400:
+ *           $ref: '#/components/responses/BadRequestError'
+ *         401:
+ *           $ref: '#/components/responses/UnauthorizedError'
+ *         403:
+ *           description: Forbidden - insufficient permissions
+ *         404:
+ *           description: Call not found
+ *         500:
+ *           $ref: '#/components/responses/ServerError'
+ * 
+ *     delete:
+ *       summary: Delete a call
+ *       description: Delete an existing scheduled call
+ *       tags: [Calls]
+ *       security:
+ *         - bearerAuth: []
+ *       parameters:
+ *         - in: path
+ *           name: id
+ *           required: true
+ *           schema:
+ *             type: string
+ *             format: uuid
+ *           description: Call ID
+ *       responses:
+ *         200:
+ *           description: Call deleted successfully
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 properties:
+ *                   status:
+ *                     type: string
+ *                     example: success
+ *                   message:
+ *                     type: string
+ *                     example: Call deleted successfully
+ *         401:
+ *           $ref: '#/components/responses/UnauthorizedError'
+ *         403:
+ *           description: Forbidden - insufficient permissions
+ *         404:
+ *           description: Call not found
+ *         409:
+ *           description: Call cannot be deleted - it's not in SCHEDULED status
+ *         500:
+ *           $ref: '#/components/responses/ServerError'
+ * 
+ *   /calls/start/{id}:
+ *     patch:
+ *       summary: Start a call
+ *       description: Mark a scheduled call as started
+ *       tags: [Calls]
+ *       security:
+ *         - bearerAuth: []
+ *       parameters:
+ *         - in: path
+ *           name: id
+ *           required: true
+ *           schema:
+ *             type: string
+ *             format: uuid
+ *           description: Call ID
+ *       responses:
+ *         200:
+ *           description: Call started successfully
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 properties:
+ *                   status:
+ *                     type: string
+ *                     example: success
+ *                   message:
+ *                     type: string
+ *                     example: Call started successfully
+ *                   data:
+ *                     $ref: '#/components/schemas/Call'
+ *         400:
+ *           $ref: '#/components/responses/BadRequestError'
+ *         401:
+ *           $ref: '#/components/responses/UnauthorizedError'
+ *         403:
+ *           description: Forbidden - insufficient permissions
+ *         404:
+ *           description: Call not found
+ *         409:
+ *           description: Call is not in SCHEDULED status
+ *         500:
+ *           $ref: '#/components/responses/ServerError'
+ * 
+ *   /calls/end/{id}:
+ *     patch:
+ *       summary: End a call
+ *       description: Mark an in-progress call as completed
+ *       tags: [Calls]
+ *       security:
+ *         - bearerAuth: []
+ *       parameters:
+ *         - in: path
+ *           name: id
+ *           required: true
+ *           schema:
+ *             type: string
+ *             format: uuid
+ *           description: Call ID
+ *       requestBody:
+ *         required: true
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 notes:
+ *                   type: string
+ *                   description: Notes about the call
+ *                 outcome:
+ *                   type: string
+ *                   description: Outcome of the call
+ *       responses:
+ *         200:
+ *           description: Call ended successfully
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 properties:
+ *                   status:
+ *                     type: string
+ *                     example: success
+ *                   message:
+ *                     type: string
+ *                     example: Call ended successfully
+ *                   data:
+ *                     $ref: '#/components/schemas/Call'
+ *         400:
+ *           $ref: '#/components/responses/BadRequestError'
+ *         401:
+ *           $ref: '#/components/responses/UnauthorizedError'
+ *         403:
+ *           description: Forbidden - insufficient permissions
+ *         404:
+ *           description: Call not found
+ *         409:
+ *           description: Call is not in IN_PROGRESS status
+ *         500:
+ *           $ref: '#/components/responses/ServerError'
+ * 
+ *   /calls/cancel/{id}:
+ *     patch:
+ *       summary: Cancel a call
+ *       description: Cancel a scheduled call
+ *       tags: [Calls]
+ *       security:
+ *         - bearerAuth: []
+ *       parameters:
+ *         - in: path
+ *           name: id
+ *           required: true
+ *           schema:
+ *             type: string
+ *             format: uuid
+ *           description: Call ID
+ *       requestBody:
+ *         required: true
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               required:
+ *                 - reason
+ *               properties:
+ *                 reason:
+ *                   type: string
+ *                   description: Reason for cancellation
+ *       responses:
+ *         200:
+ *           description: Call cancelled successfully
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 properties:
+ *                   status:
+ *                     type: string
+ *                     example: success
+ *                   message:
+ *                     type: string
+ *                     example: Call cancelled successfully
+ *                   data:
+ *                     $ref: '#/components/schemas/Call'
+ *         400:
+ *           $ref: '#/components/responses/BadRequestError'
+ *         401:
+ *           $ref: '#/components/responses/UnauthorizedError'
+ *         403:
+ *           description: Forbidden - insufficient permissions
+ *         404:
+ *           description: Call not found
+ *         409:
+ *           description: Call is not in SCHEDULED status
+ *         500:
+ *           $ref: '#/components/responses/ServerError'
+ * 
+ *   /calls/logs:
+ *     get:
+ *       summary: Get call logs
+ *       description: Retrieve a list of completed call logs with filtering, pagination, and sorting options
+ *       tags: [Calls]
+ *       security:
+ *         - bearerAuth: []
+ *       parameters:
+ *         - in: query
+ *           name: page
+ *           schema:
+ *             type: integer
+ *             minimum: 1
+ *             default: 1
+ *           description: Page number
+ *         - in: query
+ *           name: limit
+ *           schema:
+ *             type: integer
+ *             minimum: 1
+ *             maximum: 100
+ *             default: 10
+ *           description: Number of items per page
+ *         - in: query
+ *           name: startDate
+ *           schema:
+ *             type: string
+ *             format: date
+ *           description: Filter logs by start date (inclusive)
+ *         - in: query
+ *           name: endDate
+ *           schema:
+ *             type: string
+ *             format: date
+ *           description: Filter logs by end date (inclusive)
+ *         - in: query
+ *           name: status
+ *           schema:
+ *             type: string
+ *             enum: [COMPLETED, MISSED]
+ *           description: Filter logs by status
+ *         - in: query
+ *           name: contactId
+ *           schema:
+ *             type: string
+ *             format: uuid
+ *           description: Filter logs by contact ID
+ *         - in: query
+ *           name: companyId
+ *           schema:
+ *             type: string
+ *             format: uuid
+ *           description: Filter logs by company ID
+ *         - in: query
+ *           name: search
+ *           schema:
+ *             type: string
+ *           description: Search term for company or contact name, purpose, or notes
+ *         - in: query
+ *           name: sortBy
+ *           schema:
+ *             type: string
+ *             enum: [actualStartTime, duration, status, createdAt]
+ *             default: actualStartTime
+ *           description: Field to sort by
+ *         - in: query
+ *           name: order
+ *           schema:
+ *             type: string
+ *             enum: [asc, desc]
+ *             default: desc
+ *           description: Sort order
+ *       responses:
+ *         200:
+ *           description: A list of call logs
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 properties:
+ *                   status:
+ *                     type: string
+ *                     example: success
+ *                   data:
+ *                     type: object
+ *                     properties:
+ *                       logs:
+ *                         type: array
+ *                         items:
+ *                           $ref: '#/components/schemas/Call'
+ *                       pagination:
+ *                         $ref: '#/components/schemas/Pagination'
+ *         401:
+ *           $ref: '#/components/responses/UnauthorizedError'
+ *         403:
+ *           description: Forbidden - insufficient permissions
+ *         500:
+ *           $ref: '#/components/responses/ServerError'
+ * 
+ *   /calls/pending:
+ *     get:
+ *       summary: Get pending calls
+ *       description: Retrieve a list of scheduled calls that are not yet started
+ *       tags: [Calls]
+ *       security:
+ *         - bearerAuth: []
+ *       parameters:
+ *         - in: query
+ *           name: page
+ *           schema:
+ *             type: integer
+ *             minimum: 1
+ *             default: 1
+ *           description: Page number
+ *         - in: query
+ *           name: limit
+ *           schema:
+ *             type: integer
+ *             minimum: 1
+ *             maximum: 100
+ *             default: 10
+ *           description: Number of items per page
+ *         - in: query
+ *           name: startDate
+ *           schema:
+ *             type: string
+ *             format: date
+ *           description: Filter by start date (inclusive)
+ *         - in: query
+ *           name: endDate
+ *           schema:
+ *             type: string
+ *             format: date
+ *           description: Filter by end date (inclusive)
+ *         - in: query
+ *           name: contactId
+ *           schema:
+ *             type: string
+ *             format: uuid
+ *           description: Filter by contact ID
+ *         - in: query
+ *           name: companyId
+ *           schema:
+ *             type: string
+ *             format: uuid
+ *           description: Filter by company ID
+ *         - in: query
+ *           name: search
+ *           schema:
+ *             type: string
+ *           description: Search term for company or contact name, purpose, or notes
+ *         - in: query
+ *           name: sortBy
+ *           schema:
+ *             type: string
+ *             enum: [scheduledTime, createdAt]
+ *             default: scheduledTime
+ *           description: Field to sort by
+ *         - in: query
+ *           name: order
+ *           schema:
+ *             type: string
+ *             enum: [asc, desc]
+ *             default: asc
+ *           description: Sort order
+ *       responses:
+ *         200:
+ *           description: A list of pending calls
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 properties:
+ *                   status:
+ *                     type: string
+ *                     example: success
+ *                   data:
+ *                     type: object
+ *                     properties:
+ *                       calls:
+ *                         type: array
+ *                         items:
+ *                           $ref: '#/components/schemas/Call'
+ *                       pagination:
+ *                         $ref: '#/components/schemas/Pagination'
+ *         401:
+ *           $ref: '#/components/responses/UnauthorizedError'
+ *         403:
+ *           description: Forbidden - insufficient permissions
+ *         500:
+ *           $ref: '#/components/responses/ServerError'
+ * 
+ *   /calls/reports/daily:
+ *     get:
+ *       summary: Get daily call report
+ *       description: Retrieve a summary of calls for a specific day
+ *       tags: [Calls]
+ *       security:
+ *         - bearerAuth: []
+ *       parameters:
+ *         - in: query
+ *           name: date
+ *           schema:
+ *             type: string
+ *             format: date
+ *           description: Date for the report (defaults to today)
+ *       responses:
+ *         200:
+ *           description: Daily call report
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 properties:
+ *                   status:
+ *                     type: string
+ *                     example: success
+ *                   data:
+ *                     type: object
+ *                     properties:
+ *                       date:
+ *                         type: string
+ *                         format: date
+ *                       totalCalls:
+ *                         type: integer
+ *                       completedCalls:
+ *                         type: integer
+ *                       missedCalls:
+ *                         type: integer
+ *                       averageDuration:
+ *                         type: integer
+ *                       calls:
+ *                         type: array
+ *                         items:
+ *                           $ref: '#/components/schemas/Call'
+ *         401:
+ *           $ref: '#/components/responses/UnauthorizedError'
+ *         403:
+ *           description: Forbidden - insufficient permissions
+ *         500:
+ *           $ref: '#/components/responses/ServerError'
+ * 
+ *   /calls/reports/weekly:
+ *     get:
+ *       summary: Get weekly call report
+ *       description: Retrieve a summary of calls for a specific week
+ *       tags: [Calls]
+ *       security:
+ *         - bearerAuth: []
+ *       parameters:
+ *         - in: query
+ *           name: startDate
+ *           schema:
+ *             type: string
+ *             format: date
+ *           description: Start date for the week (defaults to start of current week)
+ *       responses:
+ *         200:
+ *           description: Weekly call report
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 properties:
+ *                   status:
+ *                     type: string
+ *                     example: success
+ *                   data:
+ *                     type: object
+ *                     properties:
+ *                       startDate:
+ *                         type: string
+ *                         format: date
+ *                       endDate:
+ *                         type: string
+ *                         format: date
+ *                       totalCalls:
+ *                         type: integer
+ *                       completedCalls:
+ *                         type: integer
+ *                       missedCalls:
+ *                         type: integer
+ *                       averageDuration:
+ *                         type: integer
+ *                       dailySummary:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *                           properties:
+ *                             date:
+ *                               type: string
+ *                               format: date
+ *                             totalCalls:
+ *                               type: integer
+ *                             completedCalls:
+ *                               type: integer
+ *                             missedCalls:
+ *                               type: integer
+ *         401:
+ *           $ref: '#/components/responses/UnauthorizedError'
+ *         403:
+ *           description: Forbidden - insufficient permissions
+ *         500:
+ *           $ref: '#/components/responses/ServerError'
+ * 
+ *   /calls/reports/monthly:
+ *     get:
+ *       summary: Get monthly call report
+ *       description: Retrieve a summary of calls for a specific month
+ *       tags: [Calls]
+ *       security:
+ *         - bearerAuth: []
+ *       parameters:
+ *         - in: query
+ *           name: month
+ *           schema:
+ *             type: integer
+ *             minimum: 1
+ *             maximum: 12
+ *           description: Month number (1-12, defaults to current month)
+ *         - in: query
+ *           name: year
+ *           schema:
+ *             type: integer
+ *             minimum: 2000
+ *             maximum: 2100
+ *           description: Year (defaults to current year)
+ *       responses:
+ *         200:
+ *           description: Monthly call report
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 properties:
+ *                   status:
+ *                     type: string
+ *                     example: success
+ *                   data:
+ *                     type: object
+ *                     properties:
+ *                       month:
+ *                         type: integer
+ *                       year:
+ *                         type: integer
+ *                       totalCalls:
+ *                         type: integer
+ *                       completedCalls:
+ *                         type: integer
+ *                       missedCalls:
+ *                         type: integer
+ *                       averageDuration:
+ *                         type: integer
+ *                       weeklySummary:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *                           properties:
+ *                             weekStartDate:
+ *                               type: string
+ *                               format: date
+ *                             weekEndDate:
+ *                               type: string
+ *                               format: date
+ *                             totalCalls:
+ *                               type: integer
+ *                             completedCalls:
+ *                               type: integer
+ *                             missedCalls:
+ *                               type: integer
+ *         401:
+ *           $ref: '#/components/responses/UnauthorizedError'
+ *         403:
+ *           description: Forbidden - insufficient permissions
+ *         500:
+ *           $ref: '#/components/responses/ServerError'
+ */ 

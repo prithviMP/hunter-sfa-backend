@@ -1,0 +1,829 @@
+{
+  "info": {
+    "name": "Hunter SFA - User Control APIs",
+    "description": "Collection for User Control related endpoints in Hunter SFA backend including user management, roles, permissions, departments and app management",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "User Management",
+      "description": "Endpoints for managing users in the system",
+      "item": [
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:7777/api/v1/user-control/users?page=1&limit=10&search={{searchTerm}}&roleId={{roleId}}&departmentId={{departmentId}}&isActive=true&sortBy=createdAt&order=desc",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "user-control", "users"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Items per page"
+                },
+                {
+                  "key": "search",
+                  "value": "{{searchTerm}}",
+                  "description": "Search term for name, email, phone"
+                },
+                {
+                  "key": "roleId",
+                  "value": "{{roleId}}",
+                  "description": "Filter by role ID"
+                },
+                {
+                  "key": "departmentId",
+                  "value": "{{departmentId}}",
+                  "description": "Filter by department ID"
+                },
+                {
+                  "key": "isActive",
+                  "value": "true",
+                  "description": "Filter by active status"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "description": "Field to sort by"
+                },
+                {
+                  "key": "order",
+                  "value": "desc",
+                  "description": "Sort order (asc/desc)"
+                }
+              ]
+            },
+            "description": "Get all users with filtering, sorting and pagination"
+          },
+          "response": []
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:7777/api/v1/user-control/users/{{userId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "user-control", "users", "{{userId}}"]
+            },
+            "description": "Get a specific user by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"firstName\": \"Jane\",\n    \"lastName\": \"Smith\",\n    \"email\": \"jane.smith@example.com\",\n    \"phoneNumber\": \"9876543210\",\n    \"password\": \"SecurePassword123!\",\n    \"username\": \"janesmith\",\n    \"roleId\": \"{{roleId}}\",\n    \"departmentId\": \"{{departmentId}}\",\n    \"areaIds\": [\"{{areaId1}}\", \"{{areaId2}}\"],\n    \"regionIds\": [\"{{regionId1}}\"],\n    \"address\": {\n        \"street\": \"123 Main St\",\n        \"city\": \"Mumbai\",\n        \"state\": \"Maharashtra\",\n        \"country\": \"India\",\n        \"postalCode\": \"400001\"\n    },\n    \"profileImage\": \"https://example.com/profile.jpg\",\n    \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "http://localhost:7777/api/v1/user-control/users",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "user-control", "users"]
+            },
+            "description": "Create a new user"
+          },
+          "response": []
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"firstName\": \"Jane\",\n    \"lastName\": \"Smith-Updated\",\n    \"email\": \"jane.smith.updated@example.com\",\n    \"phoneNumber\": \"9876543211\",\n    \"roleId\": \"{{roleId}}\",\n    \"departmentId\": \"{{departmentId}}\",\n    \"areaIds\": [\"{{areaId1}}\", \"{{areaId2}}\", \"{{areaId3}}\"],\n    \"address\": {\n        \"street\": \"456 New St\",\n        \"city\": \"Mumbai\",\n        \"state\": \"Maharashtra\",\n        \"country\": \"India\",\n        \"postalCode\": \"400002\"\n    },\n    \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "http://localhost:7777/api/v1/user-control/users/{{userId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "user-control", "users", "{{userId}}"]
+            },
+            "description": "Update an existing user"
+          },
+          "response": []
+        },
+        {
+          "name": "Deactivate User",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:7777/api/v1/user-control/users/{{userId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "user-control", "users", "{{userId}}"]
+            },
+            "description": "Deactivate a user (soft delete)"
+          },
+          "response": []
+        },
+        {
+          "name": "Reset User Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"newPassword\": \"NewSecurePassword456!\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:7777/api/v1/user-control/users/{{userId}}/reset-password",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "user-control", "users", "{{userId}}", "reset-password"]
+            },
+            "description": "Admin reset user password"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Role Management",
+      "description": "Endpoints for managing roles and permissions",
+      "item": [
+        {
+          "name": "Get All Roles",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:7777/api/v1/user-control/roles?page=1&limit=10&search={{searchTerm}}&isActive=true&sortBy=name&order=asc",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "user-control", "roles"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Items per page"
+                },
+                {
+                  "key": "search",
+                  "value": "{{searchTerm}}",
+                  "description": "Search term for name"
+                },
+                {
+                  "key": "isActive",
+                  "value": "true",
+                  "description": "Filter by active status"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "name",
+                  "description": "Field to sort by"
+                },
+                {
+                  "key": "order",
+                  "value": "asc",
+                  "description": "Sort order (asc/desc)"
+                }
+              ]
+            },
+            "description": "Get all roles with filtering, sorting and pagination"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Role by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:7777/api/v1/user-control/roles/{{roleId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "user-control", "roles", "{{roleId}}"]
+            },
+            "description": "Get a specific role by ID with its permissions"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Role",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Area Manager\",\n    \"description\": \"Manages sales activities in assigned area\",\n    \"permissions\": [\n        \"read:users\", \n        \"read:companies\", \n        \"create:companies\", \n        \"update:companies\",\n        \"read:visits\",\n        \"read:reports\"\n    ],\n    \"isDefault\": false,\n    \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "http://localhost:7777/api/v1/user-control/roles",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "user-control", "roles"]
+            },
+            "description": "Create a new role with permissions"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Role",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Senior Area Manager\",\n    \"description\": \"Senior manager overseeing assigned areas\",\n    \"permissions\": [\n        \"read:users\", \n        \"read:companies\", \n        \"create:companies\", \n        \"update:companies\",\n        \"read:visits\",\n        \"create:visits\",\n        \"update:visits\",\n        \"read:reports\",\n        \"export:reports\"\n    ],\n    \"isDefault\": false\n}"
+            },
+            "url": {
+              "raw": "http://localhost:7777/api/v1/user-control/roles/{{roleId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "user-control", "roles", "{{roleId}}"]
+            },
+            "description": "Update an existing role including its permissions"
+          },
+          "response": []
+        },
+        {
+          "name": "Deactivate Role",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:7777/api/v1/user-control/roles/{{roleId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "user-control", "roles", "{{roleId}}"]
+            },
+            "description": "Deactivate a role (soft delete)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Permissions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:7777/api/v1/user-control/permissions",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "user-control", "permissions"]
+            },
+            "description": "Get all available permissions grouped by module"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Department Management",
+      "description": "Endpoints for managing departments",
+      "item": [
+        {
+          "name": "Get All Departments",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:7777/api/v1/user-control/departments?page=1&limit=10&search={{searchTerm}}&isActive=true&sortBy=name&order=asc",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "user-control", "departments"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Items per page"
+                },
+                {
+                  "key": "search",
+                  "value": "{{searchTerm}}",
+                  "description": "Search term for name"
+                },
+                {
+                  "key": "isActive",
+                  "value": "true",
+                  "description": "Filter by active status"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "name",
+                  "description": "Field to sort by"
+                },
+                {
+                  "key": "order",
+                  "value": "asc",
+                  "description": "Sort order (asc/desc)"
+                }
+              ]
+            },
+            "description": "Get all departments with filtering, sorting and pagination"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Department by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:7777/api/v1/user-control/departments/{{departmentId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "user-control", "departments", "{{departmentId}}"]
+            },
+            "description": "Get a specific department by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Department",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Field Sales\",\n    \"code\": \"FSALES\",\n    \"description\": \"Department handling field sales operations\",\n    \"parentId\": \"{{parentDepartmentId}}\",\n    \"managerId\": \"{{managerId}}\",\n    \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "http://localhost:7777/api/v1/user-control/departments",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "user-control", "departments"]
+            },
+            "description": "Create a new department"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Department",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Field Sales Operations\",\n    \"description\": \"Department handling all field sales and related operations\",\n    \"managerId\": \"{{newManagerId}}\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:7777/api/v1/user-control/departments/{{departmentId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "user-control", "departments", "{{departmentId}}"]
+            },
+            "description": "Update an existing department"
+          },
+          "response": []
+        },
+        {
+          "name": "Deactivate Department",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:7777/api/v1/user-control/departments/{{departmentId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "user-control", "departments", "{{departmentId}}"]
+            },
+            "description": "Deactivate a department (soft delete)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "App Management",
+      "description": "Endpoints for managing application settings",
+      "item": [
+        {
+          "name": "Get All Apps",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:7777/api/v1/user-control/apps?page=1&limit=10&search={{searchTerm}}&isActive=true&sortBy=name&order=asc",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "user-control", "apps"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Items per page"
+                },
+                {
+                  "key": "search",
+                  "value": "{{searchTerm}}",
+                  "description": "Search term for name"
+                },
+                {
+                  "key": "isActive",
+                  "value": "true",
+                  "description": "Filter by active status"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "name",
+                  "description": "Field to sort by"
+                },
+                {
+                  "key": "order",
+                  "value": "asc",
+                  "description": "Sort order (asc/desc)"
+                }
+              ]
+            },
+            "description": "Get all apps with filtering, sorting and pagination"
+          },
+          "response": []
+        },
+        {
+          "name": "Get App by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:7777/api/v1/user-control/apps/{{appId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "user-control", "apps", "{{appId}}"]
+            },
+            "description": "Get a specific app by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Create App",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Hunter SFA Mobile\",\n    \"description\": \"Mobile application for field sales representatives\",\n    \"appKey\": \"hunter-sfa-mobile\",\n    \"appSecret\": \"mobile-app-secret-key\",\n    \"redirectUrl\": \"huntersfa://auth-callback\",\n    \"allowedOrigins\": [\"huntersfa://\"],\n    \"allowedIPs\": [],\n    \"settings\": {\n        \"theme\": \"default\",\n        \"features\": {\n            \"offlineMode\": true,\n            \"locationTracking\": true,\n            \"photoUpload\": true\n        }\n    },\n    \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "http://localhost:7777/api/v1/user-control/apps",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "user-control", "apps"]
+            },
+            "description": "Create a new app"
+          },
+          "response": []
+        },
+        {
+          "name": "Update App",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Hunter SFA Mobile v2\",\n    \"description\": \"Updated mobile application for field sales representatives\",\n    \"redirectUrl\": \"huntersfa://auth-callback-v2\",\n    \"settings\": {\n        \"theme\": \"dark\",\n        \"features\": {\n            \"offlineMode\": true,\n            \"locationTracking\": true,\n            \"photoUpload\": true,\n            \"biometricLogin\": true\n        }\n    }\n}"
+            },
+            "url": {
+              "raw": "http://localhost:7777/api/v1/user-control/apps/{{appId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "user-control", "apps", "{{appId}}"]
+            },
+            "description": "Update an existing app"
+          },
+          "response": []
+        },
+        {
+          "name": "Deactivate App",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:7777/api/v1/user-control/apps/{{appId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "user-control", "apps", "{{appId}}"]
+            },
+            "description": "Deactivate an app (soft delete)"
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Save tokens from login response if present",
+          "if (pm.response.code === 200 && pm.response.json().accessToken) {",
+          "    pm.environment.set('accessToken', pm.response.json().accessToken);",
+          "    console.log('Access token saved to environment variable');",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string",
+      "description": "JWT access token"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string",
+      "description": "ID of a user"
+    },
+    {
+      "key": "roleId",
+      "value": "",
+      "type": "string",
+      "description": "ID of a role"
+    },
+    {
+      "key": "departmentId",
+      "value": "",
+      "type": "string",
+      "description": "ID of a department"
+    },
+    {
+      "key": "parentDepartmentId",
+      "value": "",
+      "type": "string",
+      "description": "ID of a parent department"
+    },
+    {
+      "key": "managerId",
+      "value": "",
+      "type": "string",
+      "description": "ID of a manager user"
+    },
+    {
+      "key": "newManagerId",
+      "value": "",
+      "type": "string",
+      "description": "ID of a new manager user"
+    },
+    {
+      "key": "appId",
+      "value": "",
+      "type": "string",
+      "description": "ID of an app"
+    },
+    {
+      "key": "areaId1",
+      "value": "",
+      "type": "string",
+      "description": "ID of an area"
+    },
+    {
+      "key": "areaId2",
+      "value": "",
+      "type": "string",
+      "description": "ID of an area"
+    },
+    {
+      "key": "areaId3",
+      "value": "",
+      "type": "string",
+      "description": "ID of an area"
+    },
+    {
+      "key": "regionId1",
+      "value": "",
+      "type": "string",
+      "description": "ID of a region"
+    },
+    {
+      "key": "searchTerm",
+      "value": "",
+      "type": "string",
+      "description": "Search term for queries"
+    }
+  ]
+} 

@@ -1,0 +1,476 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============ USER MANAGEMENT ============
+
+model User {
+  id            String         @id @default(uuid())
+  firstName     String
+  lastName      String
+  email         String         @unique
+  username      String?        @unique
+  password      String
+  phoneNumber   String?
+  profileImage  String?
+  address       Json?
+  isActive      Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  // Relations
+  roleId        String
+  role          Role           @relation(fields: [roleId], references: [id])
+  departmentId  String?
+  department    Department?    @relation(fields: [departmentId], references: [id])
+  userAreas     UserArea[]
+  userRegions   UserRegion[]
+  managedDepartments Department[] @relation("DepartmentManager")
+  settings      UserSettings?
+  notifications Notification[]
+  emailConfigurations EmailConfiguration[]
+  createdCompanies Company[] @relation("CompanyCreator")
+  approvedCompanies Company[] @relation("CompanyApprover")
+  visits        Visit[]
+  calls         Call[]
+  refreshTokens RefreshToken[]
+
+  @@index([roleId])
+  @@index([departmentId])
+  @@index([email])
+  @@index([username])
+}
+
+// ============ AUTHENTICATION ============
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([token])
+}
+
+model Role {
+  id            String    @id @default(uuid())
+  name          String    @unique
+  description   String?
+  permissions   String[]
+  isDefault     Boolean   @default(false)
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  users         User[]
+  emailConfigurations EmailConfiguration[]
+}
+
+model Department {
+  id            String       @id @default(uuid())
+  name          String
+  code          String       @unique
+  description   String?
+  isActive      Boolean      @default(true)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  // Relations
+  parentId      String?
+  parent        Department?  @relation("DepartmentHierarchy", fields: [parentId], references: [id])
+  children      Department[] @relation("DepartmentHierarchy")
+  managerId     String?
+  manager       User?        @relation("DepartmentManager", fields: [managerId], references: [id])
+  users         User[]
+
+  @@index([parentId])
+  @@index([managerId])
+}
+
+model Area {
+  id            String     @id @default(uuid())
+  name          String
+  code          String     @unique
+  boundary      String?    // GeoJSON string for area boundary
+  isActive      Boolean    @default(true)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  // Relations
+  cityId        String?
+  city          City?      @relation(fields: [cityId], references: [id])
+  stateId       String?
+  state         State?     @relation(fields: [stateId], references: [id])
+  userAreas     UserArea[]
+  companies     Company[]  // Companies in this area
+
+  @@index([cityId])
+  @@index([stateId])
+}
+
+model Region {
+  id            String       @id @default(uuid())
+  name          String
+  code          String       @unique
+  description   String?
+  isActive      Boolean      @default(true)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  // Relations
+  userRegions   UserRegion[]
+  emailConfigurations EmailConfiguration[]
+  companies     Company[]    // Companies in this region
+}
+
+model UserArea {
+  id            String    @id @default(uuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  areaId        String
+  area          Area      @relation(fields: [areaId], references: [id], onDelete: Cascade)
+  createdAt     DateTime  @default(now())
+
+  @@unique([userId, areaId])
+  @@index([userId])
+  @@index([areaId])
+}
+
+model UserRegion {
+  id            String    @id @default(uuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  regionId      String
+  region        Region    @relation(fields: [regionId], references: [id], onDelete: Cascade)
+  createdAt     DateTime  @default(now())
+
+  @@unique([userId, regionId])
+  @@index([userId])
+  @@index([regionId])
+}
+
+// ============ APP MANAGEMENT ============
+
+model App {
+  id            String    @id @default(uuid())
+  name          String
+  key           String    @unique
+  description   String?
+  iconUrl       String?
+  baseUrl       String?
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+// ============ EMAIL CONFIGURATION ============
+
+model EmailConfiguration {
+  id            String    @id @default(uuid())
+  name          String
+  email         String
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  roleId        String
+  role          Role      @relation(fields: [roleId], references: [id])
+  regionId      String
+  region        Region    @relation(fields: [regionId], references: [id])
+  userId        String?   // Creator of the configuration
+  user          User?     @relation(fields: [userId], references: [id])
+
+  @@index([roleId])
+  @@index([regionId])
+  @@index([userId])
+}
+
+// ============ NOTIFICATION MANAGEMENT ============
+
+model Notification {
+  id            String    @id @default(uuid())
+  title         String
+  message       String
+  type          String    // e.g., 'info', 'warning', 'success', 'error'
+  isRead        Boolean   @default(false)
+  data          Json?     // Additional data related to the notification
+  createdAt     DateTime  @default(now())
+
+  // Relations
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt])
+  @@index([isRead])
+}
+
+// ============ SETTINGS MANAGEMENT ============
+
+model UserSettings {
+  id            String    @id @default(uuid())
+  notifications Json      @default("{\"email\":true,\"push\":true,\"inApp\":true,\"sms\":false}")
+  display       Json      @default("{\"theme\":\"light\",\"language\":\"en\"}")
+  dashboard     Json?     // User's dashboard preferences
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  userId        String    @unique
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model SystemSettings {
+  id            String    @id @default(uuid())
+  key           String    @unique
+  value         Json
+  category      String    // e.g., 'email', 'security', 'localization', 'branding'
+  updatedAt     DateTime  @updatedAt
+  updatedBy     String?   // User ID who last updated this setting
+}
+
+// ============ LOCATION MANAGEMENT ============
+
+model Country {
+  id            String    @id @default(uuid())
+  name          String
+  code          String    @unique
+  phoneCode     String?
+  isActive      Boolean   @default(true)
+  
+  // Relations
+  states        State[]
+}
+
+model State {
+  id            String    @id @default(uuid())
+  name          String
+  code          String    @unique
+  isActive      Boolean   @default(true)
+  
+  // Relations
+  countryId     String
+  country       Country   @relation(fields: [countryId], references: [id])
+  cities        City[]
+  areas         Area[]
+
+  @@index([countryId])
+}
+
+model City {
+  id            String    @id @default(uuid())
+  name          String
+  code          String?
+  isActive      Boolean   @default(true)
+  
+  // Relations
+  stateId       String
+  state         State     @relation(fields: [stateId], references: [id])
+  areas         Area[]
+
+  @@unique([name, stateId])
+  @@index([stateId])
+}
+
+// ============ CONTACT MANAGEMENT ============
+
+model Company {
+  id            String    @id @default(uuid())
+  name          String
+  code          String    @unique
+  type          String    // e.g., 'customer', 'distributor', 'supplier'
+  address       Json?     // Structured address data
+  phone         String?
+  email         String?
+  website       String?
+  gstNumber     String?
+  panNumber     String?
+  description   String?
+  logo          String?   // URL to company logo
+  status        String    @default("pending") // 'pending', 'approved', 'rejected'
+  statusReason  String?   // Reason for approval/rejection
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  createdById   String
+  createdBy     User      @relation("CompanyCreator", fields: [createdById], references: [id])
+  approvedById  String?
+  approvedBy    User?     @relation("CompanyApprover", fields: [approvedById], references: [id])
+  areaId        String?
+  area          Area?     @relation(fields: [areaId], references: [id])
+  regionId      String?
+  region        Region?   @relation(fields: [regionId], references: [id])
+  contacts      Contact[]
+  visits        Visit[]
+  calls         Call[]
+
+  @@index([createdById])
+  @@index([approvedById])
+  @@index([areaId])
+  @@index([regionId])
+  @@index([status])
+}
+
+model Contact {
+  id            String    @id @default(uuid())
+  firstName     String
+  lastName      String
+  designation   String?
+  email         String?
+  phone         String?
+  alternatePhone String?
+  isDecisionMaker Boolean  @default(false)
+  isActive      Boolean   @default(true)
+  notes         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  companyId     String
+  company       Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  calls         Call[]
+  
+  @@index([companyId])
+}
+
+// ============ DSR MODELS ============
+
+model Visit {
+  id            String    @id @default(uuid())
+  startTime     DateTime
+  endTime       DateTime?
+  status        String    // PLANNED, CHECKED_IN, CHECKED_OUT, COMPLETED, CANCELLED
+  purpose       String
+  notes         String?
+  location      String?   // GeoJSON Point string for check-in/check-out location
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  userId        String
+  user          User      @relation(fields: [userId], references: [id])
+  companyId     String
+  company       Company   @relation(fields: [companyId], references: [id])
+  photos        VisitPhoto[]
+  followUps     FollowUp[]
+  payments      Payment[]
+
+  @@index([userId])
+  @@index([companyId])
+  @@index([startTime])
+  @@index([status])
+}
+
+model VisitPhoto {
+  id            String    @id @default(uuid())
+  photoUrl      String
+  caption       String?
+  createdAt     DateTime  @default(now())
+
+  // Relations
+  visitId       String
+  visit         Visit     @relation(fields: [visitId], references: [id], onDelete: Cascade)
+
+  @@index([visitId])
+}
+
+model FollowUp {
+  id            String    @id @default(uuid())
+  dueDate       DateTime
+  status        String    // PENDING, COMPLETED, CANCELLED
+  priority      String    // LOW, MEDIUM, HIGH
+  notes         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  visitId       String
+  visit         Visit     @relation(fields: [visitId], references: [id], onDelete: Cascade)
+
+  @@index([visitId])
+  @@index([dueDate])
+  @@index([status])
+}
+
+model Payment {
+  id            String    @id @default(uuid())
+  amount        Float
+  paymentMethod String    // CASH, CHEQUE, ONLINE, UPI
+  reference     String?   // Reference number for the payment
+  notes         String?
+  createdAt     DateTime  @default(now())
+
+  // Relations
+  visitId       String
+  visit         Visit     @relation(fields: [visitId], references: [id], onDelete: Cascade)
+
+  @@index([visitId])
+}
+
+// ============ CALL MODELS ============
+
+model Call {
+  id              String    @id @default(uuid())
+  scheduledTime   DateTime
+  actualStartTime DateTime?
+  actualEndTime   DateTime?
+  duration        Int?      // Duration in seconds
+  status          String    // SCHEDULED, IN_PROGRESS, COMPLETED, MISSED, CANCELLED
+  purpose         String
+  notes           String?
+  outcome         String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  userId          String
+  user            User      @relation(fields: [userId], references: [id])
+  contactId       String?
+  contact         Contact?  @relation(fields: [contactId], references: [id])
+  companyId       String?
+  company         Company?  @relation(fields: [companyId], references: [id])
+
+  @@index([userId])
+  @@index([contactId])
+  @@index([companyId])
+  @@index([scheduledTime])
+  @@index([status])
+}
+
+// ============ DATA CONTROL MODELS ============
+
+model Brand {
+  id            String    @id @default(uuid())
+  name          String
+  code          String    @unique
+  description   String?
+  isCompetitor  Boolean   @default(false)
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model HSNCode {
+  id            String    @id @default(uuid())
+  code          String    @unique
+  description   String
+  gstPercentage Float
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+} 

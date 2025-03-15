@@ -1,0 +1,273 @@
+{
+  "info": {
+    "name": "Hunter SFA Auth APIs",
+    "description": "Collection for testing Hunter SFA Authentication APIs",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "description": "Authentication related endpoints",
+      "item": [
+        {
+          "name": "Login - Admin User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"john.admin@example.com\",\n    \"password\": \"Admin123!\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:7777/api/v1/auth/login",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "auth", "login"]
+            },
+            "description": "Login with admin user credentials"
+          },
+          "response": []
+        },
+        {
+          "name": "Login - Manager User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"mike.manager@example.com\",\n    \"password\": \"Manager123!\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:7777/api/v1/auth/login",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "auth", "login"]
+            },
+            "description": "Login with manager user credentials"
+          },
+          "response": []
+        },
+        {
+          "name": "Login - Sales Rep User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"sam.sales@example.com\",\n    \"password\": \"Sales123!\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:7777/api/v1/auth/login",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "auth", "login"]
+            },
+            "description": "Login with sales rep user credentials"
+          },
+          "response": []
+        },
+        {
+          "name": "Login - Username",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"johnadmin\",\n    \"password\": \"Admin123!\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:7777/api/v1/auth/login",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "auth", "login"]
+            },
+            "description": "Login with username instead of email"
+          },
+          "response": []
+        },
+        {
+          "name": "Signup - New User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"firstName\": \"New\",\n    \"lastName\": \"User\",\n    \"email\": \"new.user@example.com\",\n    \"username\": \"newuser\",\n    \"password\": \"NewUser123!\",\n    \"phoneNumber\": \"9876543210\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:7777/api/v1/auth/signup",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "auth", "signup"]
+            },
+            "description": "Register a new user"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:7777/api/v1/auth/profile",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "auth", "profile"]
+            },
+            "description": "Get the current user's profile"
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:7777/api/v1/auth/refresh-token",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "auth", "refresh-token"]
+            },
+            "description": "Refresh the access token using the refresh token cookie"
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:7777/api/v1/auth/logout",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "auth", "logout"]
+            },
+            "description": "Logout the current user"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "description": "User management endpoints",
+      "item": [
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:7777/api/v1/users",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "users"]
+            },
+            "description": "Get all users (requires admin privileges)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:7777/api/v1/health",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "7777",
+          "path": ["api", "v1", "health"]
+        },
+        "description": "Check if the API is running"
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Automatically save the access token from login responses",
+          "if (pm.response.code === 200 && pm.response.json().accessToken) {",
+          "    pm.environment.set('accessToken', pm.response.json().accessToken);",
+          "    console.log('Access token saved to environment variable');",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    }
+  ]
+} 

@@ -1,0 +1,687 @@
+{
+  "info": {
+    "name": "Hunter SFA - DSR APIs",
+    "description": "Collection for Daily Sales Report (DSR) related endpoints in Hunter SFA backend",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Visits",
+      "description": "Endpoints for managing sales visits",
+      "item": [
+        {
+          "name": "Get All Visits",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:7777/api/v1/dsr/visits?page=1&limit=10&startDate={{startDate}}&endDate={{endDate}}&status={{status}}&salesRepId={{salesRepId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "dsr", "visits"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Items per page"
+                },
+                {
+                  "key": "startDate",
+                  "value": "{{startDate}}",
+                  "description": "Start date for filtering (YYYY-MM-DD)"
+                },
+                {
+                  "key": "endDate",
+                  "value": "{{endDate}}",
+                  "description": "End date for filtering (YYYY-MM-DD)"
+                },
+                {
+                  "key": "status",
+                  "value": "{{status}}",
+                  "description": "Visit status (planned, in_progress, completed, cancelled)"
+                },
+                {
+                  "key": "salesRepId",
+                  "value": "{{salesRepId}}",
+                  "description": "Sales representative ID"
+                }
+              ]
+            },
+            "description": "Get visits with filtering and pagination"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Visit",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"companyId\": \"{{companyId}}\",\n    \"contactId\": \"{{contactId}}\",\n    \"scheduledDate\": \"2023-08-15T10:00:00Z\",\n    \"purpose\": \"Product demonstration\",\n    \"notes\": \"Demo the new Hunter SFA mobile app\",\n    \"location\": {\n        \"latitude\": 19.0760,\n        \"longitude\": 72.8777,\n        \"address\": \"Mumbai, Maharashtra\"\n    }\n}"
+            },
+            "url": {
+              "raw": "http://localhost:7777/api/v1/dsr/visits",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "dsr", "visits"]
+            },
+            "description": "Create a new scheduled visit"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Visit by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:7777/api/v1/dsr/visits/{{visitId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "dsr", "visits", "{{visitId}}"]
+            },
+            "description": "Get a specific visit by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Visit",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"scheduledDate\": \"2023-08-16T11:00:00Z\",\n    \"purpose\": \"Updated purpose\",\n    \"notes\": \"Updated notes about the visit\",\n    \"status\": \"rescheduled\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:7777/api/v1/dsr/visits/{{visitId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "dsr", "visits", "{{visitId}}"]
+            },
+            "description": "Update a visit"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Check-In/Out",
+      "description": "Check-in and check-out functionality for visits",
+      "item": [
+        {
+          "name": "Check In",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"visitId\": \"{{visitId}}\",\n    \"location\": {\n        \"latitude\": 19.0760,\n        \"longitude\": 72.8777,\n        \"address\": \"Mumbai, Maharashtra\"\n    },\n    \"notes\": \"Arrived at the location\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:7777/api/v1/dsr/check-in",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "dsr", "check-in"]
+            },
+            "description": "Check in at a visit location"
+          },
+          "response": []
+        },
+        {
+          "name": "Check Out",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"outcome\": \"successful\",\n    \"notes\": \"Client agreed to purchase our products\",\n    \"location\": {\n        \"latitude\": 19.0760,\n        \"longitude\": 72.8777,\n        \"address\": \"Mumbai, Maharashtra\"\n    }\n}"
+            },
+            "url": {
+              "raw": "http://localhost:7777/api/v1/dsr/check-out/{{visitId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "dsr", "check-out", "{{visitId}}"]
+            },
+            "description": "Check out from a visit"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Photos",
+      "description": "Photo uploads for visits",
+      "item": [
+        {
+          "name": "Upload Visit Photo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "photo",
+                  "type": "file",
+                  "src": "/path/to/photo.jpg",
+                  "description": "Photo file to upload"
+                },
+                {
+                  "key": "caption",
+                  "value": "Client meeting at office",
+                  "type": "text"
+                },
+                {
+                  "key": "type",
+                  "value": "meeting",
+                  "type": "text",
+                  "description": "Type of photo (meeting, product, document, etc.)"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:7777/api/v1/dsr/visits/{{visitId}}/photos",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "dsr", "visits", "{{visitId}}", "photos"]
+            },
+            "description": "Upload a photo for a visit"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Follow-ups",
+      "description": "Follow-up management for visits",
+      "item": [
+        {
+          "name": "Create Follow-up",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"scheduledDate\": \"2023-08-22T10:00:00Z\",\n    \"type\": \"call\",\n    \"priority\": \"high\",\n    \"notes\": \"Follow up on the product demo and quotation\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:7777/api/v1/dsr/visits/{{visitId}}/follow-ups",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "dsr", "visits", "{{visitId}}", "follow-ups"]
+            },
+            "description": "Create a follow-up for a visit"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Follow-ups",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:7777/api/v1/dsr/follow-ups?page=1&limit=10&startDate={{startDate}}&endDate={{endDate}}&status={{status}}&companyId={{companyId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "dsr", "follow-ups"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Items per page"
+                },
+                {
+                  "key": "startDate",
+                  "value": "{{startDate}}",
+                  "description": "Start date for filtering (YYYY-MM-DD)"
+                },
+                {
+                  "key": "endDate",
+                  "value": "{{endDate}}",
+                  "description": "End date for filtering (YYYY-MM-DD)"
+                },
+                {
+                  "key": "status",
+                  "value": "{{status}}",
+                  "description": "Follow-up status (pending, completed, cancelled)"
+                },
+                {
+                  "key": "companyId",
+                  "value": "{{companyId}}",
+                  "description": "Company ID"
+                }
+              ]
+            },
+            "description": "Get follow-ups with filtering and pagination"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Follow-up",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"status\": \"completed\",\n    \"outcome\": \"Client confirmed the order\",\n    \"notes\": \"Updated notes on follow-up\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:7777/api/v1/dsr/follow-ups/{{followUpId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "dsr", "follow-ups", "{{followUpId}}"]
+            },
+            "description": "Update a follow-up"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "description": "Payment tracking for visits",
+      "item": [
+        {
+          "name": "Record Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"amount\": 10000,\n    \"currency\": \"INR\",\n    \"paymentMethod\": \"cheque\",\n    \"referenceNumber\": \"CHQ123456\",\n    \"notes\": \"Payment received against invoice #INV-2023-001\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:7777/api/v1/dsr/visits/{{visitId}}/payments",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "dsr", "visits", "{{visitId}}", "payments"]
+            },
+            "description": "Record a payment collected during a visit"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Nearby Companies",
+      "description": "Lookup nearby companies",
+      "item": [
+        {
+          "name": "Get Nearby Companies",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:7777/api/v1/dsr/nearby-companies?latitude=19.0760&longitude=72.8777&radius=5&limit=10",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "dsr", "nearby-companies"],
+              "query": [
+                {
+                  "key": "latitude",
+                  "value": "19.0760",
+                  "description": "Current latitude"
+                },
+                {
+                  "key": "longitude",
+                  "value": "72.8777",
+                  "description": "Current longitude"
+                },
+                {
+                  "key": "radius",
+                  "value": "5",
+                  "description": "Search radius in kilometers"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Maximum number of results"
+                }
+              ]
+            },
+            "description": "Find companies near a location"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Reports",
+      "description": "DSR Report endpoints",
+      "item": [
+        {
+          "name": "Daily Report",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:7777/api/v1/dsr/reports/daily?date={{date}}&salesRepId={{salesRepId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "dsr", "reports", "daily"],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "{{date}}",
+                  "description": "Date for the report (YYYY-MM-DD)"
+                },
+                {
+                  "key": "salesRepId",
+                  "value": "{{salesRepId}}",
+                  "description": "Sales rep ID (optional)"
+                }
+              ]
+            },
+            "description": "Get daily sales visit report"
+          },
+          "response": []
+        },
+        {
+          "name": "Weekly Report",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:7777/api/v1/dsr/reports/weekly?startDate={{startDate}}&endDate={{endDate}}&salesRepId={{salesRepId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "dsr", "reports", "weekly"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "{{startDate}}",
+                  "description": "Start date (YYYY-MM-DD)"
+                },
+                {
+                  "key": "endDate",
+                  "value": "{{endDate}}",
+                  "description": "End date (YYYY-MM-DD)"
+                },
+                {
+                  "key": "salesRepId",
+                  "value": "{{salesRepId}}",
+                  "description": "Sales rep ID (optional)"
+                }
+              ]
+            },
+            "description": "Get weekly sales visit report"
+          },
+          "response": []
+        },
+        {
+          "name": "Monthly Report",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:7777/api/v1/dsr/reports/monthly?month={{month}}&year={{year}}&salesRepId={{salesRepId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "dsr", "reports", "monthly"],
+              "query": [
+                {
+                  "key": "month",
+                  "value": "{{month}}",
+                  "description": "Month (1-12)"
+                },
+                {
+                  "key": "year",
+                  "value": "{{year}}",
+                  "description": "Year (YYYY)"
+                },
+                {
+                  "key": "salesRepId",
+                  "value": "{{salesRepId}}",
+                  "description": "Sales rep ID (optional)"
+                }
+              ]
+            },
+            "description": "Get monthly sales visit report"
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Save tokens from login response if present",
+          "if (pm.response.code === 200 && pm.response.json().accessToken) {",
+          "    pm.environment.set('accessToken', pm.response.json().accessToken);",
+          "    console.log('Access token saved to environment variable');",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string",
+      "description": "JWT access token"
+    },
+    {
+      "key": "visitId",
+      "value": "",
+      "type": "string",
+      "description": "ID of a visit"
+    },
+    {
+      "key": "companyId",
+      "value": "",
+      "type": "string",
+      "description": "ID of a company"
+    },
+    {
+      "key": "contactId",
+      "value": "",
+      "type": "string",
+      "description": "ID of a contact"
+    },
+    {
+      "key": "followUpId",
+      "value": "",
+      "type": "string",
+      "description": "ID of a follow-up task"
+    },
+    {
+      "key": "salesRepId",
+      "value": "",
+      "type": "string",
+      "description": "ID of a sales representative"
+    },
+    {
+      "key": "startDate",
+      "value": "2023-08-01",
+      "type": "string",
+      "description": "Start date for date range filters"
+    },
+    {
+      "key": "endDate",
+      "value": "2023-08-31",
+      "type": "string",
+      "description": "End date for date range filters"
+    },
+    {
+      "key": "status",
+      "value": "",
+      "type": "string",
+      "description": "Status filter value"
+    },
+    {
+      "key": "date",
+      "value": "2023-08-15",
+      "type": "string",
+      "description": "Specific date for reports"
+    },
+    {
+      "key": "month",
+      "value": "8",
+      "type": "string",
+      "description": "Month number (1-12)"
+    },
+    {
+      "key": "year",
+      "value": "2023",
+      "type": "string",
+      "description": "Year (YYYY)"
+    }
+  ]
+} 

@@ -1,0 +1,562 @@
+/**
+ * @swagger
+ * tags:
+ *   name: DSR
+ *   description: Daily Sales Reporting API
+ * 
+ * components:
+ *   schemas:
+ *     Visit:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *           format: uuid
+ *           description: Visit unique identifier
+ *           example: 550e8400-e29b-41d4-a716-446655440000
+ *         userId:
+ *           type: string
+ *           format: uuid
+ *           description: ID of the user who made the visit
+ *           example: 550e8400-e29b-41d4-a716-446655440000
+ *         companyId:
+ *           type: string
+ *           format: uuid
+ *           description: ID of the company visited
+ *           example: 550e8400-e29b-41d4-a716-446655440000
+ *         startTime:
+ *           type: string
+ *           format: date-time
+ *           description: When the visit started
+ *           example: '2023-01-01T09:00:00Z'
+ *         endTime:
+ *           type: string
+ *           format: date-time
+ *           description: When the visit ended
+ *           example: '2023-01-01T10:30:00Z'
+ *         status:
+ *           type: string
+ *           enum: [PLANNED, CHECKED_IN, CHECKED_OUT, COMPLETED, CANCELLED]
+ *           description: Visit status
+ *           example: COMPLETED
+ *         purpose:
+ *           type: string
+ *           description: Purpose of the visit
+ *           example: Sales presentation
+ *         notes:
+ *           type: string
+ *           description: Notes about the visit
+ *           example: The customer showed interest in our new product line.
+ *         location:
+ *           type: string
+ *           description: Geolocation in PostGIS format
+ *           example: 'POINT(-122.4194 37.7749)'
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *           description: When the visit was created
+ *           example: '2023-01-01T00:00:00Z'
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *           description: When the visit was last updated
+ *           example: '2023-01-01T00:00:00Z'
+ *         company:
+ *           $ref: '#/components/schemas/Company'
+ *         user:
+ *           $ref: '#/components/schemas/User'
+ *         photos:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/VisitPhoto'
+ *         followUps:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/FollowUp'
+ *         payments:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/Payment'
+ * 
+ *     VisitPhoto:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *           format: uuid
+ *           description: Photo unique identifier
+ *           example: 550e8400-e29b-41d4-a716-446655440000
+ *         visitId:
+ *           type: string
+ *           format: uuid
+ *           description: ID of the visit this photo belongs to
+ *           example: 550e8400-e29b-41d4-a716-446655440000
+ *         photoUrl:
+ *           type: string
+ *           format: uri
+ *           description: URL to the photo
+ *           example: https://hunter-sfa-uploads.s3.amazonaws.com/visits/550e8400-e29b-41d4-a716-446655440000/photos/1.jpg
+ *         caption:
+ *           type: string
+ *           description: Optional caption for the photo
+ *           example: Store front
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *           description: When the photo was uploaded
+ *           example: '2023-01-01T09:30:00Z'
+ * 
+ *     FollowUp:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *           format: uuid
+ *           description: Follow-up unique identifier
+ *           example: 550e8400-e29b-41d4-a716-446655440000
+ *         visitId:
+ *           type: string
+ *           format: uuid
+ *           description: ID of the visit this follow-up belongs to
+ *           example: 550e8400-e29b-41d4-a716-446655440000
+ *         description:
+ *           type: string
+ *           description: Description of the follow-up
+ *           example: Send product catalog
+ *         dueDate:
+ *           type: string
+ *           format: date
+ *           description: When the follow-up is due
+ *           example: '2023-01-15'
+ *         status:
+ *           type: string
+ *           enum: [PENDING, COMPLETED, CANCELLED]
+ *           description: Follow-up status
+ *           example: PENDING
+ *         completedAt:
+ *           type: string
+ *           format: date-time
+ *           description: When the follow-up was completed
+ *           example: null
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *           description: When the follow-up was created
+ *           example: '2023-01-01T10:30:00Z'
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *           description: When the follow-up was last updated
+ *           example: '2023-01-01T10:30:00Z'
+ * 
+ *     Payment:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *           format: uuid
+ *           description: Payment unique identifier
+ *           example: 550e8400-e29b-41d4-a716-446655440000
+ *         visitId:
+ *           type: string
+ *           format: uuid
+ *           description: ID of the visit this payment belongs to
+ *           example: 550e8400-e29b-41d4-a716-446655440000
+ *         amount:
+ *           type: number
+ *           format: float
+ *           description: Payment amount
+ *           example: 1500.00
+ *         currency:
+ *           type: string
+ *           description: Payment currency
+ *           example: USD
+ *         paymentMethod:
+ *           type: string
+ *           enum: [CASH, CHECK, CARD, BANK_TRANSFER, OTHER]
+ *           description: Payment method
+ *           example: BANK_TRANSFER
+ *         referenceNumber:
+ *           type: string
+ *           description: Payment reference number
+ *           example: INV-2023-001
+ *         notes:
+ *           type: string
+ *           description: Additional notes about the payment
+ *           example: Payment for Q1 invoice
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *           description: When the payment was recorded
+ *           example: '2023-01-01T10:15:00Z'
+ * 
+ * paths:
+ *   /dsr/visits:
+ *     get:
+ *       summary: Get all visits
+ *       description: Retrieve a list of visits with filtering, pagination, and sorting options
+ *       tags: [DSR]
+ *       security:
+ *         - bearerAuth: []
+ *       parameters:
+ *         - in: query
+ *           name: page
+ *           schema:
+ *             type: integer
+ *             minimum: 1
+ *             default: 1
+ *           description: Page number
+ *         - in: query
+ *           name: limit
+ *           schema:
+ *             type: integer
+ *             minimum: 1
+ *             maximum: 100
+ *             default: 10
+ *           description: Number of items per page
+ *         - in: query
+ *           name: startDate
+ *           schema:
+ *             type: string
+ *             format: date
+ *           description: Filter visits by start date (inclusive)
+ *         - in: query
+ *           name: endDate
+ *           schema:
+ *             type: string
+ *             format: date
+ *           description: Filter visits by end date (inclusive)
+ *         - in: query
+ *           name: status
+ *           schema:
+ *             type: string
+ *             enum: [PLANNED, CHECKED_IN, CHECKED_OUT, COMPLETED, CANCELLED]
+ *           description: Filter visits by status
+ *         - in: query
+ *           name: companyId
+ *           schema:
+ *             type: string
+ *             format: uuid
+ *           description: Filter visits by company ID
+ *         - in: query
+ *           name: search
+ *           schema:
+ *             type: string
+ *           description: Search term for company name or visit purpose
+ *         - in: query
+ *           name: sortBy
+ *           schema:
+ *             type: string
+ *             enum: [startTime, endTime, status, createdAt]
+ *             default: startTime
+ *           description: Field to sort by
+ *         - in: query
+ *           name: order
+ *           schema:
+ *             type: string
+ *             enum: [asc, desc]
+ *             default: desc
+ *           description: Sort order
+ *       responses:
+ *         200:
+ *           description: A list of visits
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 properties:
+ *                   status:
+ *                     type: string
+ *                     example: success
+ *                   data:
+ *                     type: object
+ *                     properties:
+ *                       visits:
+ *                         type: array
+ *                         items:
+ *                           $ref: '#/components/schemas/Visit'
+ *                       pagination:
+ *                         $ref: '#/components/schemas/Pagination'
+ *         401:
+ *           $ref: '#/components/responses/UnauthorizedError'
+ *         403:
+ *           description: Forbidden - insufficient permissions
+ *         500:
+ *           $ref: '#/components/responses/ServerError'
+ * 
+ *     post:
+ *       summary: Create a new visit
+ *       description: Schedule a new visit to a company
+ *       tags: [DSR]
+ *       security:
+ *         - bearerAuth: []
+ *       requestBody:
+ *         required: true
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               required:
+ *                 - companyId
+ *                 - startTime
+ *                 - purpose
+ *               properties:
+ *                 companyId:
+ *                   type: string
+ *                   format: uuid
+ *                   description: ID of the company to visit
+ *                 startTime:
+ *                   type: string
+ *                   format: date-time
+ *                   description: Scheduled start time for the visit
+ *                 purpose:
+ *                   type: string
+ *                   description: Purpose of the visit
+ *                 notes:
+ *                   type: string
+ *                   description: Additional notes about the visit
+ *       responses:
+ *         201:
+ *           description: Visit created successfully
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 properties:
+ *                   status:
+ *                     type: string
+ *                     example: success
+ *                   message:
+ *                     type: string
+ *                     example: Visit scheduled successfully
+ *                   data:
+ *                     $ref: '#/components/schemas/Visit'
+ *         400:
+ *           $ref: '#/components/responses/BadRequestError'
+ *         401:
+ *           $ref: '#/components/responses/UnauthorizedError'
+ *         403:
+ *           description: Forbidden - insufficient permissions
+ *         404:
+ *           description: Company not found
+ *         500:
+ *           $ref: '#/components/responses/ServerError'
+ * 
+ *   /dsr/visits/{id}:
+ *     get:
+ *       summary: Get a specific visit
+ *       description: Retrieve detailed information about a specific visit by ID
+ *       tags: [DSR]
+ *       security:
+ *         - bearerAuth: []
+ *       parameters:
+ *         - in: path
+ *           name: id
+ *           required: true
+ *           schema:
+ *             type: string
+ *             format: uuid
+ *           description: Visit ID
+ *       responses:
+ *         200:
+ *           description: Visit details
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 properties:
+ *                   status:
+ *                     type: string
+ *                     example: success
+ *                   data:
+ *                     $ref: '#/components/schemas/Visit'
+ *         401:
+ *           $ref: '#/components/responses/UnauthorizedError'
+ *         403:
+ *           description: Forbidden - insufficient permissions
+ *         404:
+ *           description: Visit not found
+ *         500:
+ *           $ref: '#/components/responses/ServerError'
+ * 
+ *     patch:
+ *       summary: Update a visit
+ *       description: Update an existing visit's details
+ *       tags: [DSR]
+ *       security:
+ *         - bearerAuth: []
+ *       parameters:
+ *         - in: path
+ *           name: id
+ *           required: true
+ *           schema:
+ *             type: string
+ *             format: uuid
+ *           description: Visit ID
+ *       requestBody:
+ *         required: true
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 endTime:
+ *                   type: string
+ *                   format: date-time
+ *                   description: End time of the visit
+ *                 status:
+ *                   type: string
+ *                   enum: [PLANNED, CHECKED_IN, CHECKED_OUT, COMPLETED, CANCELLED]
+ *                   description: Visit status
+ *                 purpose:
+ *                   type: string
+ *                   description: Purpose of the visit
+ *                 notes:
+ *                   type: string
+ *                   description: Additional notes about the visit
+ *       responses:
+ *         200:
+ *           description: Visit updated successfully
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 properties:
+ *                   status:
+ *                     type: string
+ *                     example: success
+ *                   message:
+ *                     type: string
+ *                     example: Visit updated successfully
+ *                   data:
+ *                     $ref: '#/components/schemas/Visit'
+ *         400:
+ *           $ref: '#/components/responses/BadRequestError'
+ *         401:
+ *           $ref: '#/components/responses/UnauthorizedError'
+ *         403:
+ *           description: Forbidden - insufficient permissions
+ *         404:
+ *           description: Visit not found
+ *         500:
+ *           $ref: '#/components/responses/ServerError'
+ * 
+ *   /dsr/check-in:
+ *     post:
+ *       summary: Check in at a company
+ *       description: Record a check-in at a company location
+ *       tags: [DSR]
+ *       security:
+ *         - bearerAuth: []
+ *       requestBody:
+ *         required: true
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               required:
+ *                 - companyId
+ *                 - purpose
+ *                 - location
+ *               properties:
+ *                 companyId:
+ *                   type: string
+ *                   format: uuid
+ *                   description: ID of the company to check in at
+ *                 purpose:
+ *                   type: string
+ *                   description: Purpose of the visit
+ *                 location:
+ *                   type: string
+ *                   description: Geolocation in PostGIS format
+ *                   example: 'POINT(-122.4194 37.7749)'
+ *                 notes:
+ *                   type: string
+ *                   description: Additional notes
+ *       responses:
+ *         201:
+ *           description: Check-in recorded successfully
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 properties:
+ *                   status:
+ *                     type: string
+ *                     example: success
+ *                   message:
+ *                     type: string
+ *                     example: Check-in recorded successfully
+ *                   data:
+ *                     $ref: '#/components/schemas/Visit'
+ *         400:
+ *           $ref: '#/components/responses/BadRequestError'
+ *         401:
+ *           $ref: '#/components/responses/UnauthorizedError'
+ *         403:
+ *           description: Forbidden - insufficient permissions
+ *         404:
+ *           description: Company not found
+ *         409:
+ *           description: User already has an active check-in
+ *         500:
+ *           $ref: '#/components/responses/ServerError'
+ * 
+ *   /dsr/check-out/{id}:
+ *     patch:
+ *       summary: Check out from a visit
+ *       description: Record a check-out from an ongoing visit
+ *       tags: [DSR]
+ *       security:
+ *         - bearerAuth: []
+ *       parameters:
+ *         - in: path
+ *           name: id
+ *           required: true
+ *           schema:
+ *             type: string
+ *             format: uuid
+ *           description: Visit ID
+ *       requestBody:
+ *         required: true
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 notes:
+ *                   type: string
+ *                   description: Notes about the visit
+ *                 location:
+ *                   type: string
+ *                   description: Geolocation in PostGIS format
+ *                   example: 'POINT(-122.4194 37.7749)'
+ *       responses:
+ *         200:
+ *           description: Check-out recorded successfully
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 properties:
+ *                   status:
+ *                     type: string
+ *                     example: success
+ *                   message:
+ *                     type: string
+ *                     example: Check-out recorded successfully
+ *                   data:
+ *                     $ref: '#/components/schemas/Visit'
+ *         400:
+ *           $ref: '#/components/responses/BadRequestError'
+ *         401:
+ *           $ref: '#/components/responses/UnauthorizedError'
+ *         403:
+ *           description: Forbidden - insufficient permissions
+ *         404:
+ *           description: Visit not found
+ *         409:
+ *           description: Visit is not in CHECKED_IN status
+ *         500:
+ *           $ref: '#/components/responses/ServerError'
+ */ 

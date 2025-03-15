@@ -1,0 +1,582 @@
+{
+  "info": {
+    "name": "Hunter SFA - Calls Management APIs",
+    "description": "Collection for Calls Management related endpoints in Hunter SFA backend",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Calls",
+      "description": "Endpoints for managing business calls",
+      "item": [
+        {
+          "name": "Get All Calls",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:7777/api/v1/calls?page=1&limit=10&search={{searchTerm}}&status={{status}}&startDate={{startDate}}&endDate={{endDate}}&userId={{userId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "calls"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Items per page"
+                },
+                {
+                  "key": "search",
+                  "value": "{{searchTerm}}",
+                  "description": "Search term for call title, notes, etc."
+                },
+                {
+                  "key": "status",
+                  "value": "{{status}}",
+                  "description": "Filter by status (scheduled, in_progress, completed, cancelled)"
+                },
+                {
+                  "key": "startDate",
+                  "value": "{{startDate}}",
+                  "description": "Start date for filtering (YYYY-MM-DD)"
+                },
+                {
+                  "key": "endDate",
+                  "value": "{{endDate}}",
+                  "description": "End date for filtering (YYYY-MM-DD)"
+                },
+                {
+                  "key": "userId",
+                  "value": "{{userId}}",
+                  "description": "Filter by user ID"
+                }
+              ]
+            },
+            "description": "Get all calls with filtering, sorting and pagination"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Call",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"Product Demo for Acme Corp\",\n    \"scheduled_at\": \"2023-08-15T14:00:00Z\",\n    \"duration\": 30,\n    \"type\": \"sales\",\n    \"companyId\": \"{{companyId}}\",\n    \"contactId\": \"{{contactId}}\",\n    \"participants\": [\"{{userId}}\"],\n    \"description\": \"Scheduled call to demonstrate our new product line\",\n    \"agenda\": [\"Product introduction\", \"Demo of key features\", \"Pricing discussion\", \"Next steps\"],\n    \"reminders\": [\n        {\n            \"time\": \"2023-08-15T13:45:00Z\",\n            \"type\": \"notification\"\n        },\n        {\n            \"time\": \"2023-08-15T13:30:00Z\",\n            \"type\": \"email\"\n        }\n    ],\n    \"attachments\": [\"https://example.com/product-brochure.pdf\"]\n}"
+            },
+            "url": {
+              "raw": "http://localhost:7777/api/v1/calls",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "calls"]
+            },
+            "description": "Create a new scheduled call"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Call by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:7777/api/v1/calls/{{callId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "calls", "{{callId}}"]
+            },
+            "description": "Get a specific call by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Call",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"Updated: Product Demo for Acme Corp\",\n    \"scheduled_at\": \"2023-08-16T15:00:00Z\",\n    \"duration\": 45,\n    \"description\": \"Rescheduled call to demonstrate our new product line and address specific requirements\",\n    \"agenda\": [\"Product introduction\", \"Demo of key features\", \"Custom implementation options\", \"Pricing discussion\", \"Next steps\"]\n}"
+            },
+            "url": {
+              "raw": "http://localhost:7777/api/v1/calls/{{callId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "calls", "{{callId}}"]
+            },
+            "description": "Update an existing call"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Call",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:7777/api/v1/calls/{{callId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "calls", "{{callId}}"]
+            },
+            "description": "Delete a call"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Call Status Management",
+      "description": "Endpoints for managing call status transitions",
+      "item": [
+        {
+          "name": "Start Call",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"notes\": \"Starting the call with Acme Corp team\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:7777/api/v1/calls/{{callId}}/start",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "calls", "{{callId}}", "start"]
+            },
+            "description": "Start a scheduled call"
+          },
+          "response": []
+        },
+        {
+          "name": "End Call",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"outcome\": \"positive\",\n    \"summary\": \"Client is interested in our product. They have requested a formal proposal.\",\n    \"next_steps\": [\"Prepare and send proposal by next week\", \"Schedule follow-up call in 10 days\"],\n    \"duration_minutes\": 38\n}"
+            },
+            "url": {
+              "raw": "http://localhost:7777/api/v1/calls/{{callId}}/end",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "calls", "{{callId}}", "end"]
+            },
+            "description": "End an in-progress call"
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel Call",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"reason\": \"Client requested rescheduling\",\n    \"reschedule\": true,\n    \"reschedule_date\": \"2023-08-18T10:00:00Z\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:7777/api/v1/calls/{{callId}}/cancel",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "calls", "{{callId}}", "cancel"]
+            },
+            "description": "Cancel a scheduled call"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Call Logs",
+      "description": "Endpoints for call logs and pending activities",
+      "item": [
+        {
+          "name": "Get Call Logs",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:7777/api/v1/calls/logs?page=1&limit=10&startDate={{startDate}}&endDate={{endDate}}&status={{status}}&userId={{userId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "calls", "logs"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Items per page"
+                },
+                {
+                  "key": "startDate",
+                  "value": "{{startDate}}",
+                  "description": "Start date for filtering (YYYY-MM-DD)"
+                },
+                {
+                  "key": "endDate",
+                  "value": "{{endDate}}",
+                  "description": "End date for filtering (YYYY-MM-DD)"
+                },
+                {
+                  "key": "status",
+                  "value": "{{status}}",
+                  "description": "Filter by status"
+                },
+                {
+                  "key": "userId",
+                  "value": "{{userId}}",
+                  "description": "Filter by user ID"
+                }
+              ]
+            },
+            "description": "Get call logs with filtering and pagination"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Pending Logs",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:7777/api/v1/calls/logs/pending?page=1&limit=10",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "calls", "logs", "pending"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Items per page"
+                }
+              ]
+            },
+            "description": "Get pending call logs requiring attention"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Reports",
+      "description": "Call report endpoints",
+      "item": [
+        {
+          "name": "Daily Call Report",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:7777/api/v1/calls/reports/daily?date={{date}}&userId={{userId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "calls", "reports", "daily"],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "{{date}}",
+                  "description": "Date for the report (YYYY-MM-DD)"
+                },
+                {
+                  "key": "userId",
+                  "value": "{{userId}}",
+                  "description": "User ID (optional)"
+                }
+              ]
+            },
+            "description": "Get daily call activity report"
+          },
+          "response": []
+        },
+        {
+          "name": "Weekly Call Report",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:7777/api/v1/calls/reports/weekly?startDate={{startDate}}&endDate={{endDate}}&userId={{userId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "calls", "reports", "weekly"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "{{startDate}}",
+                  "description": "Start date (YYYY-MM-DD)"
+                },
+                {
+                  "key": "endDate",
+                  "value": "{{endDate}}",
+                  "description": "End date (YYYY-MM-DD)"
+                },
+                {
+                  "key": "userId",
+                  "value": "{{userId}}",
+                  "description": "User ID (optional)"
+                }
+              ]
+            },
+            "description": "Get weekly call activity report"
+          },
+          "response": []
+        },
+        {
+          "name": "Monthly Call Report",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT access token"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:7777/api/v1/calls/reports/monthly?month={{month}}&year={{year}}&userId={{userId}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "7777",
+              "path": ["api", "v1", "calls", "reports", "monthly"],
+              "query": [
+                {
+                  "key": "month",
+                  "value": "{{month}}",
+                  "description": "Month (1-12)"
+                },
+                {
+                  "key": "year",
+                  "value": "{{year}}",
+                  "description": "Year (YYYY)"
+                },
+                {
+                  "key": "userId",
+                  "value": "{{userId}}",
+                  "description": "User ID (optional)"
+                }
+              ]
+            },
+            "description": "Get monthly call activity report"
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Save tokens from login response if present",
+          "if (pm.response.code === 200 && pm.response.json().accessToken) {",
+          "    pm.environment.set('accessToken', pm.response.json().accessToken);",
+          "    console.log('Access token saved to environment variable');",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string",
+      "description": "JWT access token"
+    },
+    {
+      "key": "callId",
+      "value": "",
+      "type": "string",
+      "description": "ID of a call"
+    },
+    {
+      "key": "companyId",
+      "value": "",
+      "type": "string",
+      "description": "ID of a company"
+    },
+    {
+      "key": "contactId",
+      "value": "",
+      "type": "string",
+      "description": "ID of a contact"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string",
+      "description": "ID of a user"
+    },
+    {
+      "key": "searchTerm",
+      "value": "",
+      "type": "string",
+      "description": "Search term for queries"
+    },
+    {
+      "key": "status",
+      "value": "",
+      "type": "string",
+      "description": "Call status (scheduled, in_progress, completed, cancelled)"
+    },
+    {
+      "key": "startDate",
+      "value": "2023-08-01",
+      "type": "string",
+      "description": "Start date for date range filters"
+    },
+    {
+      "key": "endDate",
+      "value": "2023-08-31",
+      "type": "string",
+      "description": "End date for date range filters"
+    },
+    {
+      "key": "date",
+      "value": "2023-08-15",
+      "type": "string",
+      "description": "Specific date for reports"
+    },
+    {
+      "key": "month",
+      "value": "8",
+      "type": "string",
+      "description": "Month number (1-12)"
+    },
+    {
+      "key": "year",
+      "value": "2023",
+      "type": "string",
+      "description": "Year (YYYY)"
+    }
+  ]
+} 

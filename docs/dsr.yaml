@@ -1,0 +1,306 @@
+components:
+  schemas:
+    DSR:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        date:
+          type: string
+          format: date
+        status:
+          type: string
+          enum: [draft, submitted, approved, rejected]
+        notes:
+          type: string
+      required:
+        - id
+        - userId
+        - date
+        - status
+    
+    DSRVisit:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        dsrId:
+          type: string
+          format: uuid
+        companyId:
+          type: string
+          format: uuid
+        contactId:
+          type: string
+          format: uuid
+        checkInTime:
+          type: string
+          format: date-time
+        checkOutTime:
+          type: string
+          format: date-time
+        purpose:
+          type: string
+        outcome:
+          type: string
+        notes:
+          type: string
+      required:
+        - id
+        - dsrId
+        - companyId
+        - checkInTime
+    
+    DSRPayment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        dsrId:
+          type: string
+          format: uuid
+        companyId:
+          type: string
+          format: uuid
+        amount:
+          type: number
+          format: float
+        paymentMethod:
+          type: string
+          enum: [cash, check, bank_transfer, credit_card, other]
+        referenceNumber:
+          type: string
+        notes:
+          type: string
+      required:
+        - id
+        - dsrId
+        - companyId
+        - amount
+        - paymentMethod
+
+paths:
+  /api/v1/dsr:
+    get:
+      summary: Get all DSRs
+      tags:
+        - DSR
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [draft, submitted, approved, rejected]
+        - name: fromDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: toDate
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DSR'
+        '401':
+          description: Unauthorized
+    
+    post:
+      summary: Create a new DSR
+      tags:
+        - DSR
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                date:
+                  type: string
+                  format: date
+                notes:
+                  type: string
+              required:
+                - date
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DSR'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+  
+  /api/v1/dsr/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    
+    get:
+      summary: Get DSR by ID
+      tags:
+        - DSR
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DSR'
+        '404':
+          description: DSR not found
+        '401':
+          description: Unauthorized
+    
+    put:
+      summary: Update DSR
+      tags:
+        - DSR
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                date:
+                  type: string
+                  format: date
+                status:
+                  type: string
+                  enum: [draft, submitted, approved, rejected]
+                notes:
+                  type: string
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DSR'
+        '400':
+          description: Bad request
+        '404':
+          description: DSR not found
+        '401':
+          description: Unauthorized
+    
+    delete:
+      summary: Delete DSR
+      tags:
+        - DSR
+      responses:
+        '204':
+          description: No content
+        '404':
+          description: DSR not found
+        '401':
+          description: Unauthorized
+  
+  /api/v1/dsr/{id}/submit:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    
+    post:
+      summary: Submit DSR for approval
+      tags:
+        - DSR
+      responses:
+        '200':
+          description: Submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DSR'
+        '404':
+          description: DSR not found
+        '401':
+          description: Unauthorized
+  
+  /api/v1/dsr/{id}/approve:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    
+    post:
+      summary: Approve DSR
+      tags:
+        - DSR
+      responses:
+        '200':
+          description: Approved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DSR'
+        '404':
+          description: DSR not found
+        '401':
+          description: Unauthorized
+  
+  /api/v1/dsr/{id}/reject:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    
+    post:
+      summary: Reject DSR
+      tags:
+        - DSR
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+              required:
+                - reason
+      responses:
+        '200':
+          description: Rejected
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DSR'
+        '404':
+          description: DSR not found
+        '401':
+          description: Unauthorized 

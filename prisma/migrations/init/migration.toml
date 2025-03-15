@@ -1,0 +1,6 @@
+# This is an auto-generated file based on the schema.prisma file.
+# This file is used by the Prisma Migration Engine to uniquely identify this migration.
+
+migration_name = "init"
+migration_type = "sql"
+migration_sql = "migration.sql" 
